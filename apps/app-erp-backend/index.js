@@ -1,58 +1,61 @@
+// Versión ultra-mínima para debugging
 const express = require('express');
-const morgan = require('morgan');
-const cors = require('cors');
-
 const app = express();
 
-// Middleware básico
-app.use(cors());
-app.use(morgan('dev'));
+// Middleware básico esencial
 app.use(express.json());
 
-// Endpoints básicos sin dependencias
+// Endpoint de prueba ultra-simple
 app.get('/', (req, res) => {
-  res.json({
-    message: 'Innovapaz Backend API funcionando correctamente',
-    timestamp: new Date().toISOString(),
-    env: process.env.NODE_ENV || 'development'
-  });
+  try {
+    res.json({
+      message: 'Backend funcionando - versión minimal',
+      timestamp: new Date().toISOString(),
+      status: 'ok'
+    });
+  } catch (error) {
+    console.error('Error en endpoint raíz:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    message: 'API funcionando correctamente'
-  });
+  try {
+    res.json({
+      status: 'healthy',
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error en health:', error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
-console.log('✅ Servidor configurado - solo endpoints básicos');
+// Endpoint para debugging de variables de entorno
+app.get('/api/debug', (req, res) => {
+  try {
+    res.json({
+      node_env: process.env.NODE_ENV,
+      has_db_host: !!process.env.DB_HOST,
+      has_jwt_secret: !!process.env.JWT_SECRET,
+      timestamp: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Error en debug:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
 
-// Middleware de manejo de errores
+// Error handler simple
 app.use((err, req, res, next) => {
-  console.error('❌ Error en la aplicación:', err);
-  return res.status(500).json({
-    error: 'Error interno del servidor',
-    message: err.message,
-    timestamp: new Date().toISOString()
+  console.error('Global error:', err);
+  res.status(500).json({
+    error: 'Server error',
+    message: err.message
   });
 });
 
-// Ruta 404
-app.use('*', (req, res) => {
-  res.status(404).json({
-    error: 'Endpoint no encontrado',
-    path: req.originalUrl,
-    timestamp: new Date().toISOString()
-  });
-});
+console.log('✅ Servidor minimal configurado');
 
-// Para desarrollo local
-if (process.env.NODE_ENV !== 'production') {
-  const port = process.env.PORT || 4000;
-  app.listen(port);
-  console.log(`🚀 Server on port ${port}`);
-}
-
-// Para Vercel (exportar la app)
+// Para Vercel
 module.exports = app;
