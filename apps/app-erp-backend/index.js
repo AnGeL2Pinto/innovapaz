@@ -26,59 +26,44 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Importar y configurar rutas con manejo de errores
+// Cargar rutas una por una con manejo de errores
+const loadRoute = (path, mount, description) => {
+  try {
+    const route = require(path);
+    app.use(mount, route);
+    console.log(`✅ ${description} cargada`);
+  } catch (error) {
+    console.error(`❌ Error cargando ${description}:`, error.message);
+  }
+};
+
+// Rutas básicas sin parámetros complejos
+loadRoute('./routes/auth', '/api/auth', 'Autenticación');
+
+// Endpoints de cron
+loadRoute('./routes/cron.routes', '', 'Cron jobs');
+
+// Rutas de gestión básica
+loadRoute('./routes/users', '/api/users', 'Usuarios');
+loadRoute('./routes/companies', '/api/companies', 'Empresas');
+loadRoute('./routes/plans', '/api/plans', 'Planes');
+loadRoute('./routes/roles', '/api/roles', 'Roles');
+
+// Rutas de funcionalidades
 try {
-  // Rutas básicas
-  app.use('/api/auth', require('./routes/auth'));
-  app.use('/api/users', require('./routes/users'));
-  app.use('/api/companies', require('./routes/companies'));
-  app.use('/api/plans', require('./routes/plans'));
-  app.use('/api/roles', require('./routes/roles'));
-  app.use('/api/roles-plantilla', require('./routes/rolesPlantilla'));
-  app.use('/api/subscriptions', require('./routes/subscription'));
-  app.use('/api/invitations', require('./routes/invitations'));
-  
-  // Rutas de funcionalidades
   const reportsRoutes = require('./routes/reports.routes');
   app.use('/api/reports', reportsRoutes);
+  console.log('✅ Reportes cargados');
+} catch (error) {
+  console.error('❌ Error cargando reportes:', error.message);
+}
 
-  const taskRoutes = require('./routes/task.routes');
-  app.use(taskRoutes);
-  
-  const inventoryRoutes = require('./routes/inventories.routes');
-  app.use('/api', inventoryRoutes);
-  
-  const catalogRoutes = require('./routes/catalog.routes');
-  app.use('/api', catalogRoutes);
-  
-  const clientsRoutes = require('./routes/clients.routes');
-  app.use('/api/clients', clientsRoutes);
-  
-  const categoriesRoutes = require('./routes/categories.routes');
-  app.use('/api/client-categories', categoriesRoutes);
-  
-  const salesRoutes = require('./routes/sales.routes');
-  app.use('/api/sales', salesRoutes);
-  
-  const quotesRoutes = require('./routes/quotes.routes');
-  app.use('/api/quotes', quotesRoutes);
-  
-  const orderRoutes = require('./routes/order.routes');
-  app.use('/api', orderRoutes);
-  
-  const inventoryMovementsRoutes = require('./routes/inventory-movements.routes');
-  app.use('/api/inventory', inventoryMovementsRoutes);
-  
+try {
   const uploadRoutes = require('./routes/upload.routes');
   app.use('/api/upload', uploadRoutes);
-  
-  const cronRoutes = require('./routes/cron.routes');
-  app.use(cronRoutes);
-
-  console.log('✅ Todas las rutas cargadas correctamente');
-  
+  console.log('✅ Upload cargado');
 } catch (error) {
-  console.error('❌ Error cargando rutas:', error.message);
+  console.error('❌ Error cargando upload:', error.message);
 }
 
 // Middleware de manejo de errores
