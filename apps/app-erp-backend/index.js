@@ -13,6 +13,7 @@ const quotesRoutes = require('./routes/quotes.routes');
 const salesRoutes = require('./routes/sales.routes');
 const inventoryMovementsRoutes = require('./routes/inventory-movements.routes');
 const uploadRoutes = require('./routes/upload.routes');
+const cronRoutes = require('./routes/cron.routes');
 
 const app = express();
 
@@ -40,6 +41,7 @@ const orderRoutes = require('./routes/order.routes');
 app.use('/api', orderRoutes);
 app.use('/api/inventory', inventoryMovementsRoutes);
 app.use('/api/upload', uploadRoutes);
+app.use(cronRoutes);
 
 app.use((err, req, res, next) => {
   return res.json({
@@ -47,8 +49,15 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(4000);
-console.log('Server on port 4000');
+// Para desarrollo local
+if (process.env.NODE_ENV !== 'production') {
+  const port = process.env.PORT || 4000;
+  app.listen(port);
+  console.log(`Server on port ${port}`);
+  
+  // Configurar cron jobs para verificar suscripciones (solo en desarrollo)
+  setupCronJobs();
+}
 
-// Configurar cron jobs para verificar suscripciones
-setupCronJobs();
+// Para Vercel (exportar la app)
+module.exports = app;
