@@ -3,7 +3,14 @@ const router = express.Router();
 const companiesController = require('../controllers/companies.controller');
 const { verifyFirebaseToken } = require('../controllers/auth.controller');
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
+
+// Configurar Multer para usar memoria (compatible con Vercel)
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB límite
+  }
+});
 
 router.get('/types', companiesController.getAllCompanyTypes);
 router.post('/types', verifyFirebaseToken, companiesController.createCompanyType);

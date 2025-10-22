@@ -4,7 +4,14 @@ const usersController = require('../controllers/users.controller');
 const { verifyFirebaseToken } = require('../controllers/auth.controller');
 const { checkPlanLimits } = require('../middleware/planValidation');
 const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
+
+// Configurar Multer para usar memoria (compatible con Vercel)
+const upload = multer({ 
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 5 * 1024 * 1024 // 5MB límite
+  }
+});
 
 // Obtener todos los usuarios de una empresa
 router.get('/company/:empresa_id', verifyFirebaseToken, usersController.getUsersByCompany);
